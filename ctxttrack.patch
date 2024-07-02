@@ -1,0 +1,576 @@
+diff --git a/cst_function_testing.c b/cst_function_testing.c
+new file mode 100644
+index 000000000000..2cfb762532ae
+--- /dev/null
++++ b/cst_function_testing.c
+@@ -0,0 +1,111 @@
++#define _GNU_SOURCE
++#include<stdio.h>
++#include<linux/kernel.h>
++#include<sys/syscall.h>
++#include<unistd.h>
++#include<sys/types.h>
++#include<signal.h>
++#include<errno.h>
++#include<sys/types.h>
++#include<sys/stat.h>
++#include<fcntl.h>
++#include<sched.h>
++
++struct pid_ctxt_switch{
++	unsigned long ninvctxt;
++	unsigned long nvctxt;
++};
++int main()
++{
++	int i,loop=0;
++	long int amma;
++	struct pid_ctxt_switch ctxt={0,0};
++	while(loop<5)
++	{
++		pid_t pid=getpid();
++		printf("pid=%d\n",pid);
++		i=548;
++		sleep(5);
++		sched_yield();
++		amma=syscall(i,pid);
++		printf("system call %d returned %ld \n",i,amma);
++		if(amma==-1)
++			printf("error no is %d \n",errno);
++		i=549;
++		sleep(2);
++		sched_yield();
++		amma=syscall(i,&ctxt);
++		printf("system call %d returned %ld \n",i,amma);
++		if(amma==-1)
++			printf("error no %d \n",errno);
++		else{
++			printf("nvctxt=%ld \n",ctxt.nvctxt);
++			printf("ninvctxt=%ld \n",ctxt.ninvctxt);
++		}
++		sleep(2);
++		sched_yield();
++		i=549;
++		amma=syscall(i,&ctxt);
++		printf("system call %d returned %ld \n",i,amma);
++		if(amma==-1)
++			printf("error no is %d\n",errno);
++		else{
++			printf("nvctxt=%ld \n",ctxt.nvctxt);
++			printf("ninvctxt=%ld \n",ctxt.ninvctxt);
++		}
++		sleep(2);
++		sched_yield();
++		i=549;
++		amma=syscall(i,&ctxt);
++		printf("system call %d returned %ld \n",i,amma);
++		if(amma==-1)
++			printf("error no %d\n",errno);
++		else{
++			printf("nvctxt=%ld\n",ctxt.nvctxt);
++			printf("ninvctxt=%ld\n",ctxt.ninvctxt);
++		}
++		sleep(2);
++		sched_yield();
++		i=548;
++		amma=syscall(i,pid);
++		printf("system call %d returned %ld\n",i,amma);
++		if(amma==-1)
++			printf("error no is %d\n",errno);
++		sleep(5);
++		sched_yield();
++		i=549;
++		amma=syscall(i,&ctxt);
++		printf("system call %d returned %ld\n",i,amma);
++		if(amma==-1)
++			printf("errno %d\n",errno);
++		else{
++			printf("nvctxt=%ld\n",ctxt.nvctxt);
++			printf("ninvctxt=%ld\n",ctxt.ninvctxt);
++		}
++		sleep(5);
++		sched_yield();
++		i=550;
++		sched_yield();
++		amma=syscall(i,pid);
++		printf("system call %d returned %ld \n",i,amma);
++		if(amma==-1)
++			printf("error code is %d\n",errno);
++		sleep(5);
++		sched_yield();
++		i=549;
++		amma=syscall(i,&ctxt);
++		printf("system call %d returned %ld\n",i,amma);
++		if(amma==-1)
++			printf("error no is %d\n",errno);
++		else{
++			printf("nvctxt=%ld\n",ctxt.nvctxt);
++			printf("invctxt=%ld\n",ctxt.ninvctxt);
++		}
++		i=550;
++		sched_yield();
++		amma=syscall(i,pid);
++		printf("system call %d returned %ld\n",i,amma);
++		loop++;
++	}
++	return 0;
++}
+diff --git a/cst_test b/cst_test
+new file mode 100755
+index 000000000000..089e3019688f
+Binary files /dev/null and b/cst_test differ
+diff --git a/mysystemcalls/Makefile b/mysystemcalls/Makefile
+new file mode 100644
+index 000000000000..9ca241107bef
+--- /dev/null
++++ b/mysystemcalls/Makefile
+@@ -0,0 +1 @@
++obj-y +=cst_function.o
+diff --git a/mysystemcalls/a.out b/mysystemcalls/a.out
+new file mode 100755
+index 000000000000..ce3006f22b9a
+Binary files /dev/null and b/mysystemcalls/a.out differ
+diff --git a/mysystemcalls/cst_function.c b/mysystemcalls/cst_function.c
+new file mode 100644
+index 000000000000..abfc781fbef7
+--- /dev/null
++++ b/mysystemcalls/cst_function.c
+@@ -0,0 +1,116 @@
++#include<linux/kernel.h>
++#include<linux/syscalls.h>
++#include<linux/types.h>
++#include<linux/sched.h>
++#include<linux/pid.h>
++#include<linux/resource.h>
++/*struct task_struct *my_task;
++struct rusage r;
++
++SYSCALL_DEFINE1(register, pid_t,pid){
++	printk("Inside kernel space sys_register system call \n");
++	printk("Process id recieved =%d \n",pid);
++	my_task=get_pid_task(find_get_pid(pid),PIDTYPE_PID);
++	if(my_task){
++		printk("process nvcsw =%ld,nivcsw =%ld \n",my_task->nvcsw,my_task->nivcsw);
++		getrusage(my_task,RUSAGE_SELF,&r);
++		printk("after getruage process nvcsw =%ld, nivcsw=%ld \n", r.ru_nvcsw,r.ru_nivcsw);
++
++		return 0;
++	}
++	return -EINVAL;
++}
++
++SYSCALL_DEFINE1(fetch,struct pid_ctxt_switch __user *,ru)
++{
++	struct pid_ctxt_switch ctxt;
++	printk("Inside kernel space sys_fetch system call \n");
++	ctxt.ninvctxt=r.ru_nivcsw;
++	ctxt.nvctxt=r.ru_nvcsw;
++	printk("in fetch nvcsw = %ld,nivcsw =%ld \n",ctxt.nvctxt,ctxt.ninvctxt);
++	return copy_to_user(ru,&ctxt,sizeof(struct pid_ctxt_switch)) ? -EFAULT :0;
++}
++SYSCALL_DEFINE1(deregister,pid_t,pid)
++{
++	printk("inside sys_deregister \n");
++	printk("pid is %d\n",pid);
++	return 0;
++}
++
++*/
++LIST_HEAD(mylist);//declare and initialize an empty linked list
++struct task_struct *tasks,*my_task;//process descriptor
++struct pid_node *new_node;
++struct rusage r;
++struct pid_ctxt_switch ctxt;
++
++//register a process with a given PID 
++SYSCALL_DEFINE1(register,pid_t,pid){
++	printk("Inside kernel space sys_register system call\n");
++	printk("Process id recieved =%d\n",pid);
++	tasks=find_task_by_vpid(pid);//pointer to task struct corres to given PID
++	//my_task=get_pid_task(find_get_pid(pid),PIDTYPE_PID);
++	my_task=find_task_by_vpid(pid);
++	new_node=kmalloc(sizeof(struct pid_node),GFP_KERNEL);// GFP flag indicates memory allocation within kernel
++	if(pid<1)
++		return -22;	
++	if(!tasks)
++		return -3;	//pid doesn't exist
++	if(!new_node)
++		return -ENOMEM;	//memory allocation failure
++	new_node->pid=pid;
++	// add process to linked list
++	INIT_LIST_HEAD(&new_node->next_prev_list);
++	list_add_tail(&new_node->next_prev_list,&mylist);
++	printk("\n\n");
++	
++	//my_task=get_pid_task(find_get_pid(pid),PIDTYPE_PID);
++	//retriving information about context switches
++	if(my_task){
++		printk("process nvcsw=%ld, nivcsw=%ld\n",my_task->nvcsw,my_task->nivcsw);
++		getrusage(my_task,RUSAGE_SELF,&r);// to get info for current process
++		printk("after getrusage process nvcsw =%ld, nivcsw=%ld\n",r.ru_nvcsw,r.ru_nivcsw);
++	}
++	return 0;// return success
++}
++
++SYSCALL_DEFINE1(fetch,struct pid_ctxt_switch __user *,stats){
++	struct pid_node *entry;
++	printk("Inside kernel space sys_register system call\n");
++	
++	// initialize counters
++	stats->ninvctxt=stats->nvctxt=0;
++	
++	list_for_each_entry(entry,&mylist,next_prev_list){	//iterate over LL
++		tasks=find_task_by_vpid(entry->pid);
++		if(!tasks)//task with given PID not found
++			return -22;	
++		//printk("pid=%d\n",entry->pid);//if task with given PID is found
++		//add context switch counts for each process in the LL
++		stats->ninvctxt=stats->ninvctxt+tasks->nivcsw;
++		stats->nvctxt=stats->nvctxt+tasks->nvcsw;	
++		
++	}
++	return 0;//return success
++}
++//remove a process with a given PID
++SYSCALL_DEFINE1(deregister,pid_t,pid){
++	struct pid_node *entry;
++	int flag=0;
++	printk("Inside kernel space sys_deregister system call\n");
++	if(pid<1)
++		return -22;
++	printk("Process id passed =%d\n",pid);
++	list_for_each_entry(entry,&mylist,next_prev_list){
++		if(entry->pid==pid){
++			//remove the process from the LL
++			flag=1;
++			list_del(&entry->next_prev_list);
++			kfree(entry);
++			break;
++		}
++	}
++	if(flag==1)//process removed successfully
++		return 0;
++	return -3;//PID doesn't exist in LL
++}
+diff --git a/mysystemcalls/deregister.c b/mysystemcalls/deregister.c
+new file mode 100644
+index 000000000000..9a00f4d5e199
+--- /dev/null
++++ b/mysystemcalls/deregister.c
+@@ -0,0 +1,24 @@
++#include<linux/kernel.h>
++#include<linux/syscalls.h>
++#include<linux/sched.h>
++#include<linux/types.h>
++#include<linux/list.h>
++
++SYSCALL_DEFINE1(deregister,pid_t,pid)
++{
++	if(pid<1)
++		return -22;
++	struct pid_node *entry,*temp;
++	int flag=0;
++	list_for_each_entry_safe(entry,temp,&mylist,next_prev_list){
++		if(entry->pid==pid){
++			flag=1;
++			list_del(&entry->next_prev_list);
++			kfree(entry);
++			break;
++		}
++	}
++	if(flag==1)
++		return 0;
++	return -3;
++}
+diff --git a/mysystemcalls/fetch.c b/mysystemcalls/fetch.c
+new file mode 100644
+index 000000000000..31108ded0bb8
+--- /dev/null
++++ b/mysystemcalls/fetch.c
+@@ -0,0 +1,22 @@
++#include<linux/kernel.h>
++#include<linux/syscalls.h>
++#include<linux/sched.h>
++#include<linux/types.h>
++#include<linux/list.h>
++
++SYSCALL_DEFINE1(fetch,struct pid_ctxt_switch __user*,stats)
++{
++	struct pid_node *entry;
++	stats->ninvctxt=0;
++	stats->nvctxt=0;
++	list_for_each_entry(entry,&my_list,next_prev_list){
++		struct task_struct *task=find_task_by_vpid(entry->pid);
++		if(!task)
++			return -22;
++		else{
++			stats->ninvctxt=stats->ninvctxt+task->nivcsw;
++			stats->nvctxt=stats->nvctxt+task->nvcsw;
++		}
++	}
++	return 0;
++}
+diff --git a/mysystemcalls/kernel_signal.c b/mysystemcalls/kernel_signal.c
+new file mode 100644
+index 000000000000..757abb97e159
+--- /dev/null
++++ b/mysystemcalls/kernel_signal.c
+@@ -0,0 +1,60 @@
++#include<stdio.h>
++#include<stdlib.h>
++#include<string.h>
++#include<sys/types.h>
++#include<sys/stat.h>
++#include<fcntl.h>
++#include<unistd.h>
++#include<sys/ioctl.h>
++#include<signal.h>
++/*
++#define REG_CURRENT_TASK _IOW('a','a',int32_t*)
++#define SIG_FROM_KERNEL SIGINT //SIGUSR1 //44
++
++static int done=0;
++int check=0;
++
++void ctrl_c_handler(int n,siginfo_t *info,void *unused){
++	if(n==SIGINT){
++		printf("\n recieved ctrl-c\n");
++		done=1;
++	}
++}
++void sig_event_handler(int n,siginfo_t *info,void *unused){
++	if(n==SIG_FROM_KERNEL){
++		check=info->si_int;
++		printf("Recieved signal from kernel: Value =%u\n",check);
++	}
++}
++
++int main(){
++	int fd;
++	int32_t value,number;
++	struct sigaction act;
++	char buf[100]={0};
++
++	//install ctrl-c interrupt handler to cleanup at exit
++	sigemptyset(&act.sa_mask);
++	act.sa_flags=(SA_SIGINFO | SA_RESETHAND);
++	act.sa_sigaction=ctrl_c_handler;
++	sigaction(SIGINT,&act,NULL);
++
++	//install custom signal handler
++	sigemptyset(&act.sa_mask);
++	act.sa_flags=(SA_SIGINFO | SA_RESTART);
++	act.sa_sigaction=sig_event_handler;
++	sigaction(SIG_FROM_KERNEL,&act,NULL);
++
++	printf("Installed signal handler for SIGETX=%d\n",SIG_FROM_KERNEL);
++	sprintf(buf,"echo %d,%d > /proc/sig_target",getpid(),SIG_FROM_KERNEL);
++
++	system(buf);
++	printf("Done \n");
++
++	while(!done){
++		printf("Waiting for signal\n");
++		//blocking check
++		while(!done && !check);
++		check=0;
++	}
++}*/
+diff --git a/mysystemcalls/on_demand_signal_generator/Makefile b/mysystemcalls/on_demand_signal_generator/Makefile
+new file mode 100644
+index 000000000000..036a0a557ba0
+--- /dev/null
++++ b/mysystemcalls/on_demand_signal_generator/Makefile
+@@ -0,0 +1 @@
++obj-y	+=sig_generate_driver.o
+diff --git a/mysystemcalls/on_demand_signal_generator/sig_generate_driver.c b/mysystemcalls/on_demand_signal_generator/sig_generate_driver.c
+new file mode 100644
+index 000000000000..d36caef8a8e8
+--- /dev/null
++++ b/mysystemcalls/on_demand_signal_generator/sig_generate_driver.c
+@@ -0,0 +1,144 @@
++#include<linux/module.h>
++#include<linux/proc_fs.h>
++#include<linux/seq_file.h>
++#include<linux/kernel.h>
++#include<linux/syscalls.h>
++#include<linux/types.h>
++#include<linux/sched.h>
++#include<linux/pid.h>
++#include<linux/resource.h>
++#include<linux/timer.h>
++#include<linux/jiffies.h>
++#include<linux/string.h>
++/*
++#define TIMEOUT 6000 //timer to run every minute
++		     
++static struct timer_list sig_timer;
++struct kernel_siginfo info;
++struct task_struct *t=NULL;
++
++struct pid_sig
++{
++	int signo;
++	pid_t pid;
++};
++
++int flag_sig=0;
++
++struct pid_sig input;
++
++void timer_callback(struct timer_list *data){
++	static int count=0;
++	printk("Timer callback function called\n");
++	mod_timer(&sig_timer,jiffies+msecs_to_jiffies(TIMEOUT));
++
++	if(flag_sig==1){
++		printk("going to send signal ->%d, to pid ->%d \n",input.signo,input.pid);
++		memset(&info,0,sizeof(struct siginfo));
++		info.si_signo=input.signo;
++		info.si_code=SI_QUEUE;
++		info.si_int=++count;
++
++		rcu_read_lock();
++		t=find_task_by_vpid(input.pid);
++		if(t!=NULL){
++			rcu_read_unlock();
++			if(send_sig_info(input.signo,&info,t)<0)	//send signal
++				printk("send sig_info error \n");
++			else
++				printk("send_sig_info success! signal send...\n");
++		}
++		else{
++			printk("pid_task error\n");
++			rcu_read_unlock();
++		}
++		//flag_sig==0;
++	}
++}
++
++static int open_proc(struct inode *inode,struct file *file){
++	printk("@@@ proc file open... \n");
++	return 0;
++}
++
++static int release_proc(struct inode *inode,struct file *file){
++	printk("proc file released...\n");
++	return 0;
++}
++
++static ssize_t read_proc(struct file *filp,char __user *buffer,size_t length,loff_t *offset){
++	printk("proc file read....\n");
++	/*
++	 if(copy_to_user(buffer,"msg from /proc/sig_target",25)){
++	 	printk("Data send: ERR!\n");
++	 }
++	 else{
++	 	printk("data sent to user space \n");
++	 }
++	 */
++//	return length;
++//}
++/*
++ 
++static ssize_t write_proc(struct file *filp,const char __user *buff,size_t len,loff_t *off){
++	char buf[100]={0};
++	char data[10]={0};
++	int i=0,j=0;
++	printk(KERN_INFO "proc file write.....\t");
++	flag_sig=0;
++
++	if(len>sizeof(buf))
++		len=sizeof(buf);
++
++	if(copy_from_user(buf,buff,len))
++		printk("Data write: ERR \n");
++	else
++		printk("Data write: Success \n");
++	
++	printk("write_func data input %s \n",buf);
++	i=0;
++	j=0;
++	while(buf[j]!=0){
++		data[i]=buf[j];
++		i++;j++;
++		if(buf[j]==','){
++			data[i]=0;
++			sscanf(data,"%d",&input.pid);
++			printk("write_func data pid %d \n",input.pid);
++			i=0;
++			j++;
++			memcpy(data,&buf[j],sizeof(int));
++			sscanf(data,"%d",&input.signo);
++			printk("write_func data signo %d \n",input.signo);
++			if(((input.pid>0)&& (input.pid<99999))&& ((input.signo>0) && (input.signo<999))){
++				flag_sig=1;
++			}
++			break;
++		}
++	}
++	return len;
++}
++
++static struct proc_ops proc_fops={
++	.proc_open=open_proc,
++	.proc_read=read_proc,
++	.proc_write=write_proc,
++	.proc_release=release_proc
++};
++
++static int __init proc_init(void){
++	proc_create("sig_target",0666,NULL,&proc_fops);
++	timer_setup(&sig_timer,timer_callback,0);
++	mod_timer(&sig_timer,jiffies+msecs_to_jiffies(TIMEOUT));
++	return 0;
++}
++
++static void __exit proc_exit(void){
++	remove_proc_entry("sig_target",NULL);
++	del_timer(&sig_timer);
++}
++
++MODULE_LICENSE("GPL");
++module_init(proc_init);
++module_exit(proc_exit);*/
++
+diff --git a/mysystemcalls/register.c b/mysystemcalls/register.c
+new file mode 100644
+index 000000000000..f0da38a6b756
+--- /dev/null
++++ b/mysystemcalls/register.c
+@@ -0,0 +1,27 @@
++#include<linux/kernel.h>
++#include<linux/syscalls.h>
++#include<linux/sched.h>
++#include<linux/types.h>
++#include<linux/list.h>
++
++LIST_HEAD(mylist);
++SYSCALL_DEFINE1(register,pid_t,pid)
++{
++	if(pid<1)
++		return -22;
++//	LIST_HEAD(mylist);
++//	void initialize_list(){
++//		INIT_LIST_HEAD(&mylist);
++//	}
++//	initialize_list();
++	struct task_struct *tasks=find_task_by_vpid(pid);
++	if(!tasks)
++		return -3;
++	struct pid_node *new_node=kmalloc(sizeof(struct pid_node),GFP_KERNEL);
++//	if(!new_node)
++//		return -ENOMEM;
++	new_node->pid=pid;	
++	INIT_LIST_HEAD(&new_node->next_prev_list);
++	list_add_tail(&new_node->next_prev_list,&mylist);
++	return 0;
++}
+diff --git a/mysystemcalls/test_signal b/mysystemcalls/test_signal
+new file mode 100755
+index 000000000000..918afc48cd99
+Binary files /dev/null and b/mysystemcalls/test_signal differ
+diff --git a/userapp b/userapp
+new file mode 100755
+index 000000000000..fe2ff2fb798a
+Binary files /dev/null and b/userapp differ
