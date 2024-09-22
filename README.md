@@ -106,7 +106,7 @@ Instructions on how to compile and run the scheduler and the user application, i
 ```bash
 gcc test.c -o test
 ./test 10 5 5 3 & ./test 20 6 6 2 &
-
+'''
 --------------------------------------------------------------------------------------------------------------------------------------------------
 # Linux Character Device Driver
 
