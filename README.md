@@ -68,14 +68,6 @@ This module allows processes to communicate via signals using the `/proc` filesy
 
 This repository contains the implementation of a Linux CPU Scheduler based on the Rate-Monotonic (RMS) and Deadline-Monotonic (DMS) scheduling algorithms. It explores how to leverage the Linux kernel API to create a scheduler that handles real-time tasks with specific deadlines and periods.
 
-## Table of Contents
-
-1. [Introduction](#introduction)
-2. [System Calls](#system-calls)
-3. [Implementation Details](#implementation-details)
-4. [Scheduler API](#scheduler-api)
-5. [Schedulability Test](#schedulability-test)
-6. [User Application](#user-application)
 
 ## Introduction
 
@@ -119,14 +111,6 @@ Provides a simple user-space application that demonstrates how to interact with 
 # Linux Character Device Driver
 
 This repository hosts a Linux character device driver that demonstrates the basic mechanisms for handling read, write, open, and release operations on a character device. The driver is designed to provide practical insights into device file operations and interaction between kernel space and user space.
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [File Operations](#file-operations)
-3. [Initialization and Cleanup](#initialization-and-cleanup)
-4. [Usage](#usage)
-5. [Building and Testing](#building-and-testing)
 
 ## Project Overview
 
