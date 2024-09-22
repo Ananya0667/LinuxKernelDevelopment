@@ -22,7 +22,7 @@ Welcome to the Linux Kernel Development project. This repository contains a coll
 
 # Linux Character Device Driver - Table of Contents
 
-1. [Project Overview](#project-overview)
+1. [Intro_duction](#intro_duction)
 2. [File Operations](#file-operations)
 3. [Initialization and Cleanup](#initialization-and-cleanup)
 4. [Usage](#usage)
@@ -33,7 +33,7 @@ This section guides setting up a Linux environment using Oracle VM VirtualBox. I
 
 ## Building the Linux Kernel
 
-Comprehensive instructions on how to build the Linux kernel from source. This includes:
+Instructions on how to build the Linux kernel from source. This includes:
 
 - Installing necessary packages such as `git`, `fakeroot`, and `build-essential`.
 - Cloning the Linux kernel source from the official repository.
@@ -41,7 +41,7 @@ Comprehensive instructions on how to build the Linux kernel from source. This in
 
 ## Context Switch Tracker
 
-Development of custom system calls for tracking context switches within the Linux kernel. The project includes:
+Development of custom system calls for tracking context switches within the Linux kernel. 
 
 - Creating a directory for system calls and adding new files for each call.
 - Details on compiling and integrating these system calls into the kernel.
@@ -66,12 +66,12 @@ This module allows processes to communicate via signals using the `/proc` filesy
 
 # Linux CPU Scheduler for Real-Time Systems
 
-This repository contains the implementation of a Linux CPU Scheduler based on the Rate-Monotonic (RMS) and Deadline-Monotonic (DMS) scheduling algorithms. It explores how to leverage the Linux kernel API to create a scheduler that handles real-time tasks with specific deadlines and periods.
+The implementation of a Linux CPU Scheduler based on the Rate-Monotonic (RMS) and Deadline-Monotonic (DMS) scheduling algorithms. I explored how to leverage the Linux kernel API to create a scheduler that handles real-time tasks with specific deadlines and periods.
 
 
 ## Introduction
 
-The project simulates a real-time scheduler based on the Liu and Layland periodic task model. It utilizes static priority scheduling where tasks with shorter periods are given higher priority. The implementation includes both Rate-Monotonic Scheduling (RMS) and Deadline-Monotonic Scheduling (DMS).
+Simulated a real-time scheduler based on the Liu and Layland periodic task model. It utilizes static priority scheduling where tasks with shorter periods are given higher priority. The implementation includes both Rate-Monotonic Scheduling (RMS) and Deadline-Monotonic Scheduling (DMS).
 
 ## System Calls
 
@@ -110,11 +110,11 @@ Provides a simple user-space application that demonstrates how to interact with 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 # Linux Character Device Driver
 
-This repository hosts a Linux character device driver that demonstrates the basic mechanisms for handling read, write, open, and release operations on a character device. The driver is designed to provide practical insights into device file operations and interaction between kernel space and user space.
+A Linux character device driver that demonstrates the basic mechanisms for handling read, write, open, and release operations on a character device. The driver is designed to provide practical insights into device file operations and interaction between kernel space and user space.
 
-## Project Overview
+## Intro_duction
 
-This project implements a simple character device driver suitable for educational purposes. It covers the fundamental aspects of device driver operations in Linux, focusing on:
+Implemented a simple character device driver. It covers the fundamental aspects of device driver operations in Linux, focusing on:
 
 - Implementing file operations (read, write, open, and release).
 - Dynamically creating device files and managing device classes.
