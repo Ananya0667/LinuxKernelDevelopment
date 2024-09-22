@@ -99,14 +99,7 @@ Provides a simple user-space application that demonstrates how to interact with 
 - Performs computational tasks.
 - Yields CPU based on scheduling requirements.
 
-## Usage
 
-Instructions on how to compile and run the scheduler and the user application, including any necessary commands and expected outputs.
-
-```bash
-gcc test.c -o test
-./test 10 5 5 3 & ./test 20 6 6 2 &
-'''
 --------------------------------------------------------------------------------------------------------------------------------------------------
 # Linux Character Device Driver
 
