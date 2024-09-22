@@ -2,7 +2,7 @@
 
 Welcome to the Linux Kernel Development project. This repository contains a collection of experiments and assignments.
 
-## Table of Contents
+## Context Switch Tracker and On Demand Signal Generator - Table of Contents
 
 1. [Linux Installation: Virtual Machine Setup](#linux-installation-virtual-machine-setup)
 2. [Building the Linux Kernel](#building-the-linux-kernel)
@@ -10,6 +10,23 @@ Welcome to the Linux Kernel Development project. This repository contains a coll
 4. [On Demand Signal Generator using a Kernel Module](#on-demand-signal-generator-using-a-kernel-module)
 5. [Extra Experimentation and Learning](#extra-experimentation-and-learning)
 
+# Linux CPU Scheduler for Real-Time Systems - Table of Contents
+
+1. [Introduction](#introduction)
+2. [System Calls](#system-calls)
+3. [Implementation Details](#implementation-details)
+4. [Scheduler API](#scheduler-api)
+5. [Schedulability Test](#schedulability-test)
+6. [User Application](#user-application)
+
+
+# Linux Character Device Driver - Table of Contents
+
+1. [Project Overview](#project-overview)
+2. [File Operations](#file-operations)
+3. [Initialization and Cleanup](#initialization-and-cleanup)
+4. [Usage](#usage)
+5. [Building and Testing](#building-and-testing)
 ## Linux Installation: Virtual Machine Setup
 
 This section guides setting up a Linux environment using Oracle VM VirtualBox. It includes downloading the Ubuntu Server ISO and configuring a virtual machine with specific hardware requirements.
@@ -59,8 +76,6 @@ This repository contains the implementation of a Linux CPU Scheduler based on th
 4. [Scheduler API](#scheduler-api)
 5. [Schedulability Test](#schedulability-test)
 6. [User Application](#user-application)
-7. [Usage](#usage)
-8. [License](#license)
 
 ## Introduction
 
@@ -112,8 +127,6 @@ This repository hosts a Linux character device driver that demonstrates the basi
 3. [Initialization and Cleanup](#initialization-and-cleanup)
 4. [Usage](#usage)
 5. [Building and Testing](#building-and-testing)
-6. [Contributing](#contributing)
-7. [License](#license)
 
 ## Project Overview
 
