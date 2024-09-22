@@ -1,66 +1,168 @@
-# Linux Kernel Dev
+# Linux Kernel Development
 
-Welcome to the Linux Kernel Dev project! This repository hosts a collection of Linux kernel development assignments and experiments focusing on kernel modules, system calls, and process management. The project aims to provide insights into kernel operations and practical hands-on experience with system-level programming in Linux.
+Welcome to the Linux Kernel Development project. This repository contains a collection of experiments and assignments.
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Setup and Installation](#setup-and-installation)
-- [Kernel Modules and System Calls](#kernel-modules-and-system-calls)
-- [Scheduling Algorithms](#scheduling-algorithms)
-- [Context Switch Tracking](#context-switch-tracking)
-- [On-Demand Signal Generator](#on-demand-signal-generator)
-- [How to Use](#how-to-use)
-- [Contributing](#contributing)
-- [License](#license)
+1. [Linux Installation: Virtual Machine Setup](#linux-installation-virtual-machine-setup)
+2. [Building the Linux Kernel](#building-the-linux-kernel)
+3. [Context Switch Tracker](#context-switch-tracker)
+4. [On Demand Signal Generator using a Kernel Module](#on-demand-signal-generator-using-a-kernel-module)
+5. [Extra Experimentation and Learning](#extra-experimentation-and-learning)
+
+## Linux Installation: Virtual Machine Setup
+
+This section guides setting up a Linux environment using Oracle VM VirtualBox. It includes downloading the Ubuntu Server ISO and configuring a virtual machine with specific hardware requirements.
+
+## Building the Linux Kernel
+
+Comprehensive instructions on how to build the Linux kernel from source. This includes:
+
+- Installing necessary packages such as `git`, `fakeroot`, and `build-essential`.
+- Cloning the Linux kernel source from the official repository.
+- Commands for configuring and compiling the kernel using `make` and resolving common errors encountered during the build.
+
+## Context Switch Tracker
+
+Development of custom system calls for tracking context switches within the Linux kernel. The project includes:
+
+- Creating a directory for system calls and adding new files for each call.
+- Details on compiling and integrating these system calls into the kernel.
+- Implementing a linked list to manage processes and track their context switches.
+
+## On Demand Signal Generator using a Kernel Module
+
+This module allows processes to communicate via signals using the `/proc` filesystem:
+
+- Description of creating a `/proc` file to facilitate inter-process communication.
+- Implementation of a workqueue to handle signal operations.
+- Detailed explanation of the module's functions like initialization, operation, and cleanup.
+
+## Extra Experimentation and Learning
+
+- Exploration of different methods to monitor context switch counts using the `rusage` structure and `/proc` filesystem.
+- Discussion on the practical differences and use cases for `sleep()` and `sched yield()` system calls.
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Linux CPU Scheduler for Real-Time Systems
+
+This repository contains the implementation of a Linux CPU Scheduler based on the Rate-Monotonic (RMS) and Deadline-Monotonic (DMS) scheduling algorithms. It explores how to leverage the Linux kernel API to create a scheduler that handles real-time tasks with specific deadlines and periods.
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [System Calls](#system-calls)
+3. [Implementation Details](#implementation-details)
+4. [Scheduler API](#scheduler-api)
+5. [Schedulability Test](#schedulability-test)
+6. [User Application](#user-application)
+7. [Usage](#usage)
+8. [License](#license)
+
+## Introduction
+
+The project simulates a real-time scheduler based on the Liu and Layland periodic task model. It utilizes static priority scheduling where tasks with shorter periods are given higher priority. The implementation includes both Rate-Monotonic Scheduling (RMS) and Deadline-Monotonic Scheduling (DMS).
+
+## System Calls
+
+Implemented custom system calls include:
+- `sys_register_dm`: Registers a task with given period, deadline, and execution time.
+- `sys_yield`: Called by a task to release the CPU voluntarily until the next period.
+- `sys_remove`: Removes a task and frees associated resources.
+- `sys_list`: Lists all registered tasks with their parameters.
+
+## Implementation Details
+
+This section elaborates on the technical details of the scheduler:
+- **Task States**: Tasks can be in READY, RUNNING, or SLEEPING state.
+- **Process Control Block**: Custom PCBs are augmented with scheduling parameters.
+- **Task Registration and Removal**: How tasks are added to the scheduler and subsequently removed.
+
+## Scheduler API
+
+Describes the kernel scheduler functions used:
+- `schedule()`: Used by tasks to voluntarily yield the CPU.
+- `wake_up_process()`: Wakes up a sleeping process.
+- `sched_setscheduler()`: Sets the scheduling policy and priority for processes.
+
+## Schedulability Test
+
+Details the function `compute_interference`, which ensures all tasks can complete within their deadlines to maintain system schedulability.
+
+## User Application
+
+Provides a simple user-space application that demonstrates how to interact with the scheduler:
+- Registers real-time processes.
+- Performs computational tasks.
+- Yields CPU based on scheduling requirements.
+
+## Usage
+
+Instructions on how to compile and run the scheduler and the user application, including any necessary commands and expected outputs.
+
+```bash
+gcc test.c -o test
+./test 10 5 5 3 & ./test 20 6 6 2 &
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+# Linux Character Device Driver
+
+This repository hosts a Linux character device driver that demonstrates the basic mechanisms for handling read, write, open, and release operations on a character device. The driver is designed to provide practical insights into device file operations and interaction between kernel space and user space.
+
+## Table of Contents
+
+1. [Project Overview](#project-overview)
+2. [File Operations](#file-operations)
+3. [Initialization and Cleanup](#initialization-and-cleanup)
+4. [Usage](#usage)
+5. [Building and Testing](#building-and-testing)
+6. [Contributing](#contributing)
+7. [License](#license)
 
 ## Project Overview
 
-This project encompasses multiple assignments that delve into the Linux kernel's functionalities, such as creating kernel modules, system calls, and various methods of process scheduling. It includes implementations of Rate-Monotonic (RMS) and Deadline-Monotonic Scheduling (DMS), a Context Switch Tracker, and an On-Demand Signal Generator using the Linux kernel.
+This project implements a simple character device driver suitable for educational purposes. It covers the fundamental aspects of device driver operations in Linux, focusing on:
 
-## Setup and Installation
+- Implementing file operations (read, write, open, and release).
+- Dynamically creating device files and managing device classes.
+- Properly handling module initialization and cleanup.
 
-Detailed instructions on setting up a virtual machine for kernel development, building the Linux kernel, and configuring system parameters.
+## File Operations
 
-### Prerequisites
-- Oracle VM VirtualBox Manager
-- Ubuntu Server 22.04.03
-- Required tools and libraries (e.g., `git`, `make`, `gcc`)
+The driver defines several callback functions:
 
-### Configuration
-- Setup a virtual machine with 4 CPU cores and 8GB RAM.
-- Install the necessary development tools and build the Linux kernel from source.
+- `my_open`: Handles opening operations of the device file.
+- `my_release`: Manages closing operations.
+- `my_read`: Retrieves data from the device to the user buffer.
+- `my_write`: Sends data from the user buffer to the device.
 
-## Kernel Modules and System Calls
+Each operation is linked to the typical system calls used by character devices.
 
-Introduction to writing and implementing custom kernel modules and system calls. This section includes:
-- Creation of dummy system calls for educational purposes.
-- Implementation of context switch tracking mechanism within the kernel.
+## Initialization and Cleanup
 
-## Scheduling Algorithms
+- **Initialization (`my_init`):** 
+  - Dynamically allocates device numbers.
+  - Registers the device class.
+  - Creates device files accessible from user space.
 
-Implementation of scheduling algorithms using the Linux Kernel API, which includes:
-- Deadline Monotonic (DM) and Rate Monotonic (RM) scheduling.
-- System calls for task registration and management.
+- **Cleanup (`my_exit`):**
+  - Unregisters device numbers and destroys device classes and files.
 
-## Context Switch Tracking
+## Usage
 
-Development of a system call to monitor and record context switches within the Linux kernel, aiding in performance analysis and debugging.
+Detailed function descriptors for each part of the driver are provided, including how data transactions are handled and errors are managed.
 
-## On-Demand Signal Generator
+## Building and Testing
 
-A kernel module that allows processes to send signals to each other on-demand using a virtual file in the `/proc` directory. This module includes:
-- Implementation of a workqueue to handle signal delivery.
-- User-space applications to interact with the kernel module.
+Instructions for compiling and loading the module, as well as running the provided writer and reader test programs:
 
-## How to Use
+```bash
+gcc writer.c -o writer
+./writer /dev/mydevice1 "message to write"
 
-Examples and explanations on how to compile and run the modules, interact with the implemented system calls, and utilize the user applications for testing.
+gcc reader.c -o reader
+./reader /dev/mydevice0
 
-## Contributing
-
-Guidelines for contributing to the project, including how to submit issues, feature requests, and pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
