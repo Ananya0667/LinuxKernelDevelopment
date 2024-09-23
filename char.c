@@ -104,22 +104,7 @@ static ssize_t my_read(struct file *filp, char __user *buf, size_t len, loff_t *
 static ssize_t my_write(struct file *filp, const char __user *buf, size_t len, loff_t *off){
     size_t maxdatalen = mem_size;
     int check_minor;
-    /*char *start,*end;
-    char temp;
-    char *output_string1;
-    output_string1=kmalloc(strlen(buf)+1,GFP_KERNEL);
-    if (!output_string1)
-        return -ENOMEM; // Memory allocation failed
-    strcpy(output_string1, buf);
-    start=output_string1;
-    end=output_string1+strlen(output_string1)-1;
-    if (!output_string1)
-        return -ENOMEM; // Memory allocation failed
-    while(start<end){
-        temp=*start;
-        *start++=*end;
-        *end--=temp;
-    }*/
+   
     //check if the device is the writing device
     check_minor = MINOR(filp->f_path.dentry->d_inode->i_rdev);
 	if(check_minor!=1){
@@ -128,22 +113,11 @@ static ssize_t my_write(struct file *filp, const char __user *buf, size_t len, l
 	}
     printk("len of string is %zu \n",len);
     
-    //printk("output string1 length is %zu",strlen(output_string1));
 	// Prevent buffer overrun
     if (len > maxdatalen) {
         printk("Data truncated, exceeding buffer size\n");
         len = maxdatalen;
     }
-   // printk("output string 1 is%s\n",output_string1);
-    // Copy reversed string from kernel space (output_string1) to user space (buf)
-    /*
-    if (copy_to_user(buf, output_string1, len)) {
-        // If copy_to_user returns non-zero, it means an error occurred
-        printk("Error copying data to user space\n");
-        kfree(output_string1); // Free allocated memory
-        return -EFAULT;
-    }
-    */
 
     // Copy data from user space 
     if(copy_from_user(&kernel_buffer[write_start], buf, len)){
@@ -160,8 +134,6 @@ static ssize_t my_write(struct file *filp, const char __user *buf, size_t len, l
     }
     printk("Total Data in buffer is: %s\n", kernel_buffer);
 
-    // Free allocated memory
-    //kfree(output_string1);
     return len;
 }
 
